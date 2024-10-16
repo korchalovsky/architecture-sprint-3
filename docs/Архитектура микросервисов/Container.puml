@@ -1,0 +1,74 @@
+@startuml
+title SmartHome Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "Пользователь умного дома")
+Person(admin, "Administrator", "Администратор управляющий системой")
+
+System(SmartHome, "SmartHome System", "System managing memberships, schedules, and payments")
+
+Container_Boundary(SmartHome, "SmartHome System") {
+  Container(WebApp, "Web Application", "Java", "Веб интерфейс")
+  Container(Gateway, "API Gateway", "Kong", "Обеспечивает централизованное управление трафиком")
+  Container(UserService, "Сервис управления пользователями", "Java", "Управляет пользователями")
+  Container(LightService, "Сервис управления освещением", "Java", "Управляет устройствами освещения")
+  Container(HeatingService, "Сервис управления отоплением", "Java", "Управляет устройствами отопления")
+  Container(ObservationService, "Сервис управления наблюдением", "Java", "Управляет устройствами наблюдения")
+  Container(GateService, "Сервис управления воротами", "Java", "Управляет автоматическими воротами")
+  Container(ScheduleService, "Сервис обработки заданий по расписанию", "Java", "Вызывает нужные сервисы при необходимости запуска задач по расписанию")
+  Container(TelemetryService, "Сервис сбора телеметрии с устройств", "Java", "Подписывается на топики сервисов для сбора информации")
+  Container(Kafka, "Брокер сообщений", "Kafka", "Хранит задания по расписанию для выполнения и телеметрию с девайсов")
+
+  Container(GatewayDatabase, "Gateway Database", "PostgreSQL", "Хранит данные Kong")
+  Container(UserServiceDatabase, "UserService Database", "PostgreSQL", "Хранит данные о пользователях")
+  Container(LightServiceDatabase, "LightService Database", "PostgreSQL", "Хранит данные LightService")
+  Container(HeatingServiceDatabase, "HeatingService Database", "PostgreSQL", "Хранит данные HeatingService")
+  Container(ObservationServiceDatabase, "ObservationService Database", "PostgreSQL", "Хранит данные ObservationService")
+  Container(GateServiceDatabase, "GateService Database", "PostgreSQL", "Хранит данные GateService")
+  Container(ScheduleServiceDatabase, "ScheduleService Database", "PostgreSQL", "Хранит данные ScheduleService")
+}
+
+System_Ext(client2, "Connected home N", "Подключенный дом к системе")
+System_Ext(client1, "Connected home 1", "Подключенный дом к системе")
+
+Rel(user, WebApp, "Использование системы")
+Rel(admin, WebApp, "Администрирование системы")
+Rel(WebApp, Gateway, "Запросы к нужным сервисам через API Gateway")
+
+Rel(Gateway, UserService, "Запрос к сервису управления пользователями")
+Rel(Gateway, LightService, "Запрос к сервису управления освещением")
+Rel(Gateway, HeatingService, "Запрос к сервису управления отоплением")
+Rel(Gateway, ObservationService, "Запрос к сервису управления наблюдением")
+Rel(Gateway, GateService, "Запрос к сервису управления воротами")
+
+Rel(Gateway, GatewayDatabase, "Чтение/запись данных")
+Rel(UserService, UserServiceDatabase,  "Чтение/запись данных")
+Rel(LightService, LightServiceDatabase,  "Чтение/запись данных")
+Rel(HeatingService, HeatingServiceDatabase, "Чтение/запись данных")
+Rel(ObservationService, ObservationServiceDatabase, "Чтение/запись данных")
+Rel(GateService, GateServiceDatabase, "Чтение/запись данных")
+Rel(ScheduleService, ScheduleServiceDatabase, "Чтение/запись данных")
+
+
+Rel(LightService, client1, "Управление устройством")
+Rel(HeatingService, client1, "Управление устройством")
+Rel(ObservationService, client1, "Управление устройством")
+Rel(GateService, client1, "Управление устройством")
+
+Rel(LightService, client2, "Управление устройством")
+Rel(HeatingService, client2, "Управление устройством")
+Rel(ObservationService, client2, "Управление устройством")
+Rel(GateService, client2, "Управление устройством")
+
+Rel(ScheduleService, Kafka, "Публикует задания для выполнения в брокер")
+
+Rel(LightService, Kafka, "Чтение задания из брокера и выполнение")
+Rel(HeatingService, Kafka, "Чтение задания из брокера и выполнение")
+Rel(ObservationService, Kafka, "Чтение задания из брокера и выполнение")
+Rel(GateService, Kafka, "Чтение задания из брокера и выполнение")
+
+
+@enduml
