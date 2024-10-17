@@ -1,0 +1,120 @@
+@startuml
+title SmartHome Web Application Component Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "Пользователь умного дома")
+Person(admin, "Administrator", "Администратор управляющий системой")
+
+Container_Boundary(SmartHome, "SmartHome System") {
+  Container(WebApp, "Web Application", "Java", "Веб интерфейс")
+  Container(Gateway, "API Gateway", "Kong", "Обеспечивает централизованное управление трафиком")
+  Container(UserService, "Сервис управления пользователями", "Java", "Управляет пользователями")
+  Container(LightService, "Сервис управления освещением", "Java", "Управляет устройствами освещения")
+  Container(HeatingService, "Сервис управления отоплением", "Java", "Управляет устройствами отопления")
+  Container(ObservationService, "Сервис управления наблюдением", "Java", "Управляет устройствами наблюдения")
+  Container(GateService, "Сервис управления воротами", "Java", "Управляет автоматическими воротами")
+  Container(ScheduleService, "Сервис обработки заданий по расписанию", "Java", "Вызывает нужные сервисы при необходимости запуска задач по расписанию")
+  Container(TelemetryService, "Сервис сбора телеметрии с устройств", "Java", "Подписывается на топики сервисов для сбора информации")
+  Container(Kafka, "Брокер сообщений", "Kafka", "Хранит задания по расписанию для выполнения и телеметрию с девайсов")
+}
+
+Container(Gateway, "API Gateway", "Kong", "Обеспечивает централизованное управление трафиком") {
+  Component(RoutingController, "Маршрутизация", "Централизация маршрутизации запросов")
+  Component(AuthController, "Аутентификация и авторизация", "Управление аутентификацией и авторизацией")
+  Component(BalancingController, "Балансировка", "Балансировка нагрузки и распределение трафика")
+  Component(SecurityController, "Контроллер безопасности", "Обеспечение безопасности")
+  Component(CachingController, "Кэширование", "Кэширование запросов")
+}
+Container(WebApp, "Web Application", "Java", "Веб интерфейс") {
+  Component(AdminService, "Админка сервиса", "Веб интерфейс администрирования системы")
+  Component(LKService, "Личный кабинет сервиса", "Веб интерфейс личного кабинета пользователя")
+
+}
+Container(LightService, "Сервис управления освещением", "Java", "Управляет устройствами освещения") {
+  Component(LightServiceAPI, "API сервиса", "Обработка API запросов")
+  Component(LightDevicesManager, "Менеджер состояния устройств", "Проверка и изменения состояния устройства")
+  Component(LightCommandHandler, "Обработчик команд", "Выполнение команды на устройстве")
+  Component(LightScheduleService, "Cервис управления заданий по расписанию ", "Чтение событий из брокера и выполнение")
+}
+Container(HeatingService, "Сервис управления отоплением", "Java", "Управляет устройствами отопления") {
+  Component(HeatingServiceAPI, "API сервиса", "Обработка API запросов")
+  Component(HeatingDevicesManager, "Менеджер состояния устройств", "Проверка и изменения состояния устройства")
+  Component(HeatingCommandHandler, "Обработчик команд", "Выполнение команды на устройстве")
+  Component(HeatingScheduleService, "Cервис управления заданий по расписанию ", "Чтение событий из брокера и выполнение")
+}
+Container(ObservationService, "Сервис управления наблюдением", "Java", "Управляет устройствами наблюдения") {
+  Component(ObservationServiceAPI,"API сервиса", "Обработка API запросов")
+  Component(ObservationManager, "Менеджер состояния устройств", "Проверка и изменения состояния устройства")
+  Component(ObservationCommandHandler, "Обработчик команд", "Выполнение команды на устройстве")
+  Component(ObservationScheduleService, "Cервис управления заданий по расписанию ", "Чтение событий из брокера и выполнение")
+}
+Container(GateService, "Сервис управления воротами", "Java", "Управляет автоматическими воротами") {
+  Component(GateServiceAPI, "API сервиса", "Обработка API запросов")
+  Component(GateDevicesManager, "Менеджер состояния устройств", "Проверка и изменения состояния устройства")
+  Component(GateCommandHandler, "Обработчик команд", "Выполнение команды на устройстве")
+  Component(GateScheduleService, "Cервис управления заданий по расписанию ", "Чтение событий из брокера и выполнение")
+}
+Container(ScheduleService, "Сервис обработки заданий по расписанию", "Java", "Вызывает нужные сервисы при необходимости запуска задач по расписанию") {
+  Component(ScheduleServiceAPI, "API сервиса", "Обработка API запросов")
+  Component(ScheduleManager, "Менеджер расписанием", "Настройка расписания автоматических команд")
+  Component(ScheduleRunner, "Запуск команд по расписанию", "Запускает команды в назначенное время")
+}
+
+Container(Kafka, "Брокер сообщений", "Kafka", "Хранит задания по расписанию для выполнения и телеметрию с девайсов") {
+  Component(LightScheduleTopic, "Топик управления освещением", "Хранит задания для выполнения")
+  Component(HeatingScheduleTopic, "Топик управления отоплением", "Хранит задания для выполнения")
+  Component(ObservationScheduleTopic, "Топик управления наблюдением", "Хранит задания для выполнения")
+  Component(GateScheduleTopic, "Топик управления воротами", "Хранит задания для выполнения")
+
+  Component(LightTelemetryTopic, "Топик с телеметрией освещения", "Хранит телеметрию с устройств")
+  Component(HeatingTelemetryTopic, "Топик с телеметрией отопления", "Хранит телеметрию с устройств")
+  Component(ObservationTelemetryTopic, "Топик с телеметрией наблюдения", "Хранит телеметрию с устройств")
+  Component(GateTelemetryTopic, "Топик с телеметрией ворот", "Хранит телеметрию с устройств")
+}
+
+Container(UserService, "Сервис управления пользователями", "Java", "Управляет пользователями") {
+  Component(UserServiceAPI,"API сервиса", "Обработка API запросов")
+}
+
+Container(TelemetryService, "Сервис сбора телеметрии с устройств", "Java", "Подписывается на топики сервисов для сбора информации") {
+  Component(CollectService, "Сбор телеметрии", "Сбор телеметрии из брокера")
+}
+
+Rel(user, LKService, "Использование системы")
+Rel(admin, AdminService, "Администрирование системы")
+
+Rel(LKService, Gateway, "Запрос данных для админки")
+Rel(AdminService, Gateway, "Запрос данных для личного кабинета")
+
+Rel(Gateway, UserServiceAPI, "Запрос данных для клиентов")
+Rel(Gateway, LightServiceAPI, "Запрос данных для клиентов")
+Rel(Gateway, HeatingServiceAPI, "Запрос данных для клиентов")
+Rel(Gateway, ObservationServiceAPI, "Запрос данных для клиентов")
+Rel(Gateway, GateServiceAPI, "Запрос данных для клиентов")
+Rel(Gateway, ScheduleServiceAPI, "Запрос данных для клиентов")
+
+Rel(ScheduleRunner, LightScheduleTopic, "Создает событие задания по расписанию")
+Rel(ScheduleRunner, HeatingScheduleTopic, "Создает событие задания по расписанию")
+Rel(ScheduleRunner, ObservationScheduleTopic, "Создает событие задания по расписанию")
+Rel(ScheduleRunner, GateScheduleTopic, "Создает событие задания по расписанию")
+
+
+Rel(LightScheduleService, LightScheduleTopic, "Создает событие задания по расписанию")
+Rel(HeatingScheduleService, HeatingScheduleTopic, "Создает событие задания по расписанию")
+Rel(ObservationScheduleService, ObservationScheduleTopic, "Создает событие задания по расписанию")
+Rel(GateScheduleService, GateScheduleTopic, "Создает событие задания по расписанию")
+
+Rel(LightService, LightTelemetryTopic, "Посылает телеметрию в брокер")
+Rel(LightService, HeatingTelemetryTopic, "Посылает телеметрию в брокер")
+Rel(HeatingService, ObservationTelemetryTopic, "Посылает телеметрию в брокер")
+Rel(GateService, GateTelemetryTopic, "Посылает телеметрию в брокер")
+
+Rel(CollectService, LightTelemetryTopic, "Вычитывает из брокера данные телеметрии")
+Rel(CollectService, HeatingTelemetryTopic, "Вычитывает из брокера данные телеметрии")
+Rel(CollectService, ObservationTelemetryTopic,"Вычитывает из брокера данные телеметрии")
+Rel(CollectService, GateTelemetryTopic, "Вычитывает из брокера данные телеметрии")
+
+@enduml

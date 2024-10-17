@@ -1,0 +1,76 @@
+@startuml
+title SmartHome ER Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class User {
+  +id: int
+  +last_name: str
+  +first_name: str
+  +username: str
+  +email: str
+  +password: str
+}
+
+class House {
+  +id: int
+  +user_id: int
+  +address: str
+  +status: enum str
+}
+
+class Device {
+  +id: int
+  +type: enum str
+  +house_id: int
+  +serial_number: str
+  +status: enum str
+}
+
+class LightDevice {
+  +device_id: int
+  +status: enum str
+  ...
+}
+
+class HeatingDevice {
+  +device_id: int
+  +status: enum str
+  ...
+}
+
+class ObservationDevice {
+  +device_id: int
+  +status: enum str
+  ...
+}
+
+class GateDevice {
+  +device_id: int
+  +status: enum str
+  ...
+}
+
+class Schedule {
+  +device_id: int
+  +status: enum str
+  +schedule: json
+}
+
+class Telemetry {
+  +device_id: int
+  +data: json
+}
+
+User "1" -- "*" House : Один пользователь может управлять несколькими домами
+House "1" -- "*" Device : Один дом может иметь множество девайсов
+Device "1" -- "1" LightDevice : Один девайс может иметь только один девайс освещения
+Device "1" -- "1" HeatingDevice : Один девайс может иметь только один девайс отопления
+Device "1" -- "1" ObservationDevice : Один девайс может иметь только один девайс наблюдения
+Device "1" -- "1" GateDevice : Один девайс может иметь только один девайс ворот
+Device "1" -- "*" Schedule : Один девайс может иметь множество расписаний
+Device "1" -- "*" Telemetry : Один девайс может иметь множество записей телеметрии
+
+@enduml

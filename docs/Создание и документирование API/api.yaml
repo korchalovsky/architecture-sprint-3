@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    This is a SmartHome Server based on the OpenAPI 3.0 specification.
+  version: 2.0.0
+servers:
+  - url: https://smarthome.swagger.io/api/v2
+tags:
+  - name: users
+    description: Все о пользователях
+  - name: devices
+    description: Все о девайсах
+paths:
+  /users/registration:
+    post:
+      tags:
+        - users
+      summary: Регистрация пользователя
+      description: Позволяет пользователю самостоятельно зарегистрироваться в системе
+      operationId: registrateUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveUser'
+  /user/login:
+    post:
+      tags:
+        - users
+      summary: Вход в систему
+      description: ''
+      operationId: loginUser
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - users
+      summary: Выход из системы
+      description: ''
+      operationId: logoutUser
+      parameters: []
+      responses:
+        default:
+          description: successful operation
+  /user/{id}:
+    get:
+      tags:
+        - users
+      summary: Получение пользователя по id
+      description: ''
+      operationId: getUserByName
+      parameters:
+        - name: id
+          in: path
+          description: 'The name that needs to be fetched. Use user1 for testing. '
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveUser'
+        '404':
+          description: User not found
+    patch:
+      tags:
+        - users
+      summary: Обновление пользователя
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          description: name that need to be patched
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveUser'
+    delete:
+      tags:
+        - users
+      summary: Удаление поьзователя
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+  /user/{user_id}/houses:
+    get:
+      tags:
+        - users
+      summary: Получение домов пользователя
+      description: ''
+      operationId: getUserHouses
+      parameters:
+        - name: user_id
+          in: path
+          description: 'The name that needs to be fetched. Use user1 for testing. '
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/House'
+        '404':
+          description: User not found
+  /devices:
+    get:
+      tags:
+        - devices
+      summary: Получение списка устройств
+      description: ''
+      operationId: getDevices
+      parameters:
+        - name: house_id
+          in: query
+          description: 'Фильтрация девайсов по дому'
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RetrieveDevice'
+    post:
+      tags:
+        - devices
+      summary: Создание девайса
+      description: Создание девайса
+      operationId: createDevice
+      requestBody:
+        description: Created device object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDevice'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveDevice'
+  /devices/{id}:
+    patch:
+      tags:
+        - devices
+      summary: Обновление устройства
+      description: Обновление устройства
+      operationId: updateDevice
+      parameters:
+        - name: id
+          in: path
+          description: name that need to be patched
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Update an existent user in the store
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDevice'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetrieveDevice'
+  /devices/{devices_id}/schedule:
+    post:
+      tags:
+        - devices
+      summary: Создание расписания для девайса
+      description: Создание расписания для девайса
+      operationId: CreateScheduleDevice
+      parameters:
+        - name: devices_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Created device object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScheduleDevice'
+      responses:
+        default:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/scheduleDevice'
+    get:
+      tags:
+        - devices
+      summary: Получение списка расписаний устройства
+      description: Получение списка расписаний устройства
+      operationId: getScheduleDevices
+      parameters:
+        - name: devices_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/scheduleDevice'
+  /devices/{devices_id}/telemetry:
+    get:
+      tags:
+        - devices
+      summary: Получение телеметрии устройства
+      description: Получение телеметрии устройства
+      operationId: getTelemetryDevices
+      parameters:
+        - name: devices_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TelemetryData'
+components:
+  schemas:
+    CreateUser:
+      type: object
+      properties:
+        username:
+          type: string
+          example: theUser
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: '12345'
+    RetrieveUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+          example: theUser
+        password:
+          type: string
+          example: '12345'
+    CreateDevice:
+      type: object
+      properties:
+        type:
+          type: string
+          example: 'light'
+        house_id:
+          type: integer
+          example: 5
+        serial_number:
+          type: string
+          example: 'qwfreg44gg'
+        status:
+          type: string
+          example: 'active'
+    RetrieveDevice:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        type:
+          type: string
+          example: 'light'
+        house_id:
+          type: integer
+          example: 5
+        serial_number:
+          type: string
+          example: 'qwfreg44gg'
+        status:
+          type: string
+          example: 'active'
+    scheduleDevice:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        device_id:
+          type: string
+          example: 'light'
+        status:
+          type: string
+          example: 'active'
+        schedule:
+          type: object
+          example: {"duration": "every_day", "time_from": "10:00", "time_to": "12:00"}
+    CreateScheduleDevice:
+      type: object
+      properties:
+        device_id:
+          type: integer
+          example: 5
+        status:
+          type: string
+          example: 'active'
+        schedule:
+          type: object
+          example: {"duration": "every_day", "time_from": "10:00", "time_to": "12:00"}
+    TelemetryData:
+      type: object
+      properties:
+        device_id:
+          type: integer
+          example: 5
+        data:
+          type: object
+    Tokens:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: string
+        refresh_token:
+          type: string
+          example: string
+    House:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        user_id:
+          type: integer
+          example: 5
+        address:
+          type: string
+          example: 'Москва'
+        status:
+          type: string
+          example: 'active'
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+  securitySchemes:
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
